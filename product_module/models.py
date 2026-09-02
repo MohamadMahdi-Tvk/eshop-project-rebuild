@@ -1,6 +1,5 @@
 from django.db import models
 from django.urls import reverse
-from django.utils.text import slugify
 
 
 class ProductCategory(models.Model):
@@ -19,13 +18,13 @@ class ProductCategory(models.Model):
 
 
 class Product(models.Model):
-    title = models.CharField(max_length=300, verbose_name='عنوان')
+    title = models.CharField(max_length=300, verbose_name='نام محصول')
     category = models.ManyToManyField(ProductCategory, related_name='product_categories', verbose_name='دسته بندی ها')
     price = models.IntegerField(verbose_name='قیمت')
     short_description = models.CharField(max_length=360, db_index=True, null=True, verbose_name='توضیحات کوتاه')
     description = models.TextField(verbose_name='توضیحات اصلی', db_index=True)
     is_active = models.BooleanField(default=False, verbose_name='فعال / غیرفعال')
-    slug = models.SlugField(default="", null=False, db_index=True, blank=True, max_length=200, unique=True)
+    slug = models.SlugField(default="", null=False, db_index=True, blank=True, max_length=200, unique=True, verbose_name='عنوان در url')
     is_delete = models.BooleanField(verbose_name='حذف شده / نشده')
 
     class Meta:
@@ -39,7 +38,6 @@ class Product(models.Model):
         return reverse('product_detail', args=[self.slug])
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
 
