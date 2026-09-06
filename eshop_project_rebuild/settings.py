@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'home_module',
     'product_module',
+    'contact_module',
     'django_render_partial'
 ]
 
