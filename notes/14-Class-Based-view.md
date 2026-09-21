@@ -80,3 +80,22 @@ class HomeView(TemplateView):
 
 `<p>{{ data }}</p>`
 `<p>{{ message }}</p>`
+
+
+## **kwargs
+
+در تمپلیت ویو ها، اگر بخواهیم مقدار داینامیک پتس مثل اسلاگ برای صفحه ی جزئیات را بدست بیاوریم، یعنی همان سگمنت هایی که
+بصورت داینامیک به آن آدرس ارسال میشوند، باید با استفاده از کیوردآرگومان هایی که به گت کانتکس دیتا ارسال میشوند این کار
+را انجام دهیم:
+
+```
+class ProductDetailView(TemplateView):
+    template_name = 'product_module/product_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ProductDetailView, self).get_context_data()
+        slug = kwargs['slug']
+        product = get_object_or_404(Product, slug=slug)
+        context['product'] = product
+        return context
+```
