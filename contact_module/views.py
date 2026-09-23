@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from .forms import ContactUsForm, ContactUsModelForm
-from .models import ContactUs
+from .forms import ContactUsModelForm, ProfileForm
+from .models import ContactUs, UserProfile
 from django.views import View
 from django.views.generic.edit import FormView, CreateView
 
@@ -11,17 +11,29 @@ class ContactUsView(CreateView):
     success_url = '/contact-us/'
 
 
+def store_file(file):
+    with open('temp/image.jpg', "wb+") as dest:
+        for chunk in file.chunks():
+            dest.write(chunk)
+
+
 class CreateProfileView(View):
     def get(self, request):
-        return render(request, 'contact_module/create_profile_page.html')
+        form = ProfileForm()
+        return render(request, 'contact_module/create_profile_page.html', {
+            'form': form,
+        })
 
     def post(self, request):
-        print(request.FILES)
-        return redirect('/contact-us/create-profile')
+        submitted_form = ProfileForm(request.POST, request.FILES)
+        if submitted_form.is_valid():
+            profile = UserProfile(image=request.FILES['user_image'])
+            profile.save()
+            return redirect('/contact-us/create-profile')
 
-
-
-
+        return render(request, 'contact_module/create_profile_page.html', {
+            'form': submitted_form,
+        })
 
 # ------------------------------------------------------------------------------------------------------------
 # class ContactUsView(FormView):
