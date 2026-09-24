@@ -16,7 +16,6 @@ class ProductCategory(models.Model):
         return f'( {self.title} - {self.url_title} )'
 
 
-
 class ProductBrand(models.Model):
     title = models.CharField(max_length=300, verbose_name='نام برند', db_index=True)
     is_active = models.BooleanField(verbose_name='فعال / غیرفعال')
@@ -29,10 +28,10 @@ class ProductBrand(models.Model):
         return self.title
 
 
-
 class Product(models.Model):
     title = models.CharField(max_length=300, verbose_name='نام محصول')
     category = models.ManyToManyField(ProductCategory, related_name='product_categories', verbose_name='دسته بندی ها')
+    image = models.ImageField(upload_to='images/products', null=True, blank=True, verbose_name='تصویر محصول')
     brand = models.ForeignKey(ProductBrand, on_delete=models.CASCADE, verbose_name='برند', null=True, blank=True)
     price = models.IntegerField(verbose_name='قیمت')
     short_description = models.CharField(max_length=360, db_index=True, null=True, verbose_name='توضیحات کوتاه')
@@ -53,7 +52,6 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-
 
 
 class ProductTag(models.Model):
