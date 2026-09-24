@@ -97,3 +97,5 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# SESSION_COOKIE_AGE = 120
