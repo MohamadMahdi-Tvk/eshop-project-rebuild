@@ -15,10 +15,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # internal apps
+    'account_module',
     'home_module',
     'product_module',
     'contact_module',
-    'django_render_partial'
+    # external apps
+    'django_render_partial',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +54,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'eshop_project_rebuild.wsgi.application'
 
+AUTH_USER_MODEL = 'account_module.User'
 
 DATABASES = {
     'default': {
@@ -73,7 +77,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 LANGUAGE_CODE = 'fa-ir'
 
