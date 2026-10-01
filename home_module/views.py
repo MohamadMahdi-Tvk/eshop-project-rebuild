@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from site_module.models import SiteSetting, FooterLinkBox
+from site_module.models import SiteSetting, FooterLinkBox, Slider
 
 
 class HomeView(TemplateView):
@@ -8,8 +8,8 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['data'] = 'this is data in home page'
-        context['message'] = 'this is message in home page'
+        sliders = Slider.objects.filter(is_active=True)
+        context['sliders'] = sliders
         return context
 
 
