@@ -1,14 +1,5 @@
 from django.shortcuts import render
-from django.views import View
 from django.views.generic import TemplateView
-
-
-# class HomeView(View):
-#     def get(self, request):
-#         context = {
-#             'data': 'this is data'
-#         }
-#         return render(request, 'home_module/index_page.html', context)
 
 
 class HomeView(TemplateView):
