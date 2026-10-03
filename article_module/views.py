@@ -1,3 +1,22 @@
 from django.shortcuts import render
+from django.views import View
+from django.views.generic.list import ListView
 
-# Create your views here.
+from article_module.models import Article
+
+
+class ArticleListView(ListView):
+    model = Article
+    paginate_by = 5
+    template_name = 'article_module/articles_page.html'
+
+
+
+
+# class ArticleView(View):
+#     def get(self, request):
+#         articles = Article.objects.filter(is_active=True)
+#         context = {
+#             'articles': articles
+#         }
+#         return render(request, 'article_module/articles_page.html', context)
