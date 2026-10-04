@@ -1,5 +1,6 @@
 {% extends 'shared/_layout.html' %}
 {% load thumbnail %}
+{% load poll_extras %}
 
 {% block title %}لیست مقالات{% endblock %}
 
@@ -7,11 +8,10 @@
     <section>
         <div class="container">
             <div class="row">
-
+                {% comment %}{{ 'test' | cut:'t' }}{% endcomment %}
                 <div class="col-sm-9">
                     <div class="blog-post-area">
                         <h2 class="title text-center">آخریـن اخبـار</h2>
-
                         {% for article in object_list %}
                             <div class="single-blog-post">
                                 <h3>{{ article.title }}</h3>
@@ -20,8 +20,8 @@
                                         {% if article.author is not None %}
                                             <li><i class="fa fa-user"></i>{{ article.author }}</li>
                                         {% endif %}
-                                        <li><i class="fa fa-clock-o"></i> 17:20 ب.ظ</li>
-                                        <li><i class="fa fa-calendar"></i> 28 تیـر 1397</li>
+                                        {% comment %}<li><i class="fa fa-clock-o"></i>{{ article.create_date.time }}</li>{% endcomment %}
+                                        <li><i class="fa fa-calendar"></i>{{ article.create_date.date }}</li>
                                     </ul>
                                     <span>
 										<i class="fa fa-star"></i>
