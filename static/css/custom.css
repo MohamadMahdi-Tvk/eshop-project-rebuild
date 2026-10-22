@@ -2,6 +2,10 @@
     padding-right: 0 !important;
 }
 
-.errorlist li{
+.errorlist li {
     color: red;
+}
+
+ul {
+    padding-right: 0;
 }
