@@ -18,6 +18,7 @@ class ProductCategory(models.Model):
 
 class ProductBrand(models.Model):
     title = models.CharField(max_length=300, verbose_name='نام برند', db_index=True)
+    url_title = models.CharField(max_length=300, verbose_name='نام در url', db_index=True)
     is_active = models.BooleanField(verbose_name='فعال / غیرفعال')
 
     class Meta:
@@ -37,7 +38,8 @@ class Product(models.Model):
     short_description = models.CharField(max_length=360, db_index=True, null=True, verbose_name='توضیحات کوتاه')
     description = models.TextField(verbose_name='توضیحات اصلی', db_index=True)
     is_active = models.BooleanField(default=False, verbose_name='فعال / غیرفعال')
-    slug = models.SlugField(default="", null=False, db_index=True, blank=True, max_length=200, unique=True, verbose_name='عنوان در url')
+    slug = models.SlugField(default="", null=False, db_index=True, blank=True, max_length=200, unique=True,
+                            verbose_name='عنوان در url')
     is_delete = models.BooleanField(verbose_name='حذف شده / نشده')
 
     class Meta:
