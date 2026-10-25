@@ -21,15 +21,18 @@
 
                             <ul class="pagination">
                                 {% if page_obj.has_previous %}
-                                    <li><a class="cursor_pointer" onclick="fillPage({{ page_obj.previous_page_number }})">قبلی</a></li>
+                                    <li><a class="cursor_pointer"
+                                           onclick="fillPage({{ page_obj.previous_page_number }})">قبلی</a></li>
                                 {% endif %}
                                 {% for pageNumber in paginator.page_range %}
                                     <li class="{% if page_obj.number == pageNumber %} active {% endif %}">
-                                        <a class="cursor_pointer" onclick="fillPage({{ pageNumber }})">{{ pageNumber }}</a>
+                                        <a class="cursor_pointer"
+                                           onclick="fillPage({{ pageNumber }})">{{ pageNumber }}</a>
                                     </li>
                                 {% endfor %}
                                 {% if page_obj.has_next %}
-                                    <li><a class="cursor_pointer" onclick="fillPage({{ page_obj.next_page_number }})">بعدی</a></li>
+                                    <li><a class="cursor_pointer" onclick="fillPage({{ page_obj.next_page_number }})">بعدی</a>
+                                    </li>
                                 {% endif %}
                             </ul>
 
@@ -72,7 +75,13 @@
                         </div>
 
                         <div class="shipping text-center"><!--shipping-->
-                            <img src="/static/images/home/shipping.jpg" alt="">
+                            {% for banner in banners %}
+                                <a href="{{ banner.url }}">
+                                    <img src="{{ banner.image.url }}" alt="">
+                                </a>
+                            {% endfor %}
+                            <br>
+                            <br>
                         </div><!--/shipping-->
 
                     </div>
