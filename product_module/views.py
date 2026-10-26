@@ -13,7 +13,7 @@ class ProductListView(ListView):
     model = Product
     context_object_name = 'products'
     ordering = ['-price']
-    paginate_by = 1
+    paginate_by = 3
 
     def get_context_data(self, *, object_list=None, **kwargs):
         print('context_data')
@@ -24,7 +24,8 @@ class ProductListView(ListView):
         context['db_max_price'] = db_max_price
         context['start_price'] = self.request.GET.get('start_price') or 0
         context['end_price'] = self.request.GET.get('end_price') or db_max_price
-        context['banners'] = SiteBanner.objects.filter(is_active=True, position__iexact=SiteBanner.SiteBannerPositions.product_list)
+        context['banners'] = SiteBanner.objects.filter(is_active=True,
+                                                       position__iexact=SiteBanner.SiteBannerPositions.product_list)
         return context
 
     def get_queryset(self):
@@ -58,7 +59,8 @@ class ProductDetailView(DetailView):
         request = self.request
         favorite_product_id = request.session.get('product_favorite')
         context['is_favorite'] = favorite_product_id == str(loaded_product.id)
-        context['banners'] = SiteBanner.objects.filter(is_active=True, position__iexact=SiteBanner.SiteBannerPositions.product_detail)
+        context['banners'] = SiteBanner.objects.filter(is_active=True,
+                                                       position__iexact=SiteBanner.SiteBannerPositions.product_detail)
         return context
 
 
