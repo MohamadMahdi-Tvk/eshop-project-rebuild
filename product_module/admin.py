@@ -11,11 +11,17 @@ admin.site.register(models.Product, ProductAdmin)
 admin.site.register(models.ProductCategory)
 admin.site.register(models.ProductTag)
 admin.site.register(models.ProductBrand)
+admin.site.register(models.ProductVisit)
 
 # ----------------------------------------------------------------------------------------------------
-# username & password:
+# username & password (admin):
 
-# username: mohamadmahdi
-# password: 123456
+# username: admin
+# password: 1234
+
+# username & password (other user):
+
+# username: ----
+# password:abc@1234
 
 # ----------------------------------------------------------------------------------------------------
