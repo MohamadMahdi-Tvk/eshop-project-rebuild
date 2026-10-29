@@ -14,7 +14,7 @@ class ProductListView(ListView):
     model = Product
     context_object_name = 'products'
     ordering = ['-price']
-    paginate_by = 3
+    paginate_by = 6
 
     def get_context_data(self, *, object_list=None, **kwargs):
         print('context_data')
