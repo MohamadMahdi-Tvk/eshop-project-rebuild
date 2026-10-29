@@ -3,10 +3,10 @@ from django.http import HttpRequest
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.views.generic.base import View
-
 from site_module.models import SiteBanner
 from utils.http_service import get_client_ip
-from .models import Product, ProductCategory, ProductBrand, ProductVisit
+from utils.converters import group_list
+from .models import Product, ProductCategory, ProductBrand, ProductVisit, ProductGallery
 
 
 class ProductListView(ListView):
@@ -62,6 +62,7 @@ class ProductDetailView(DetailView):
         context['is_favorite'] = favorite_product_id == str(loaded_product.id)
         context['banners'] = SiteBanner.objects.filter(is_active=True,
                                                        position__iexact=SiteBanner.SiteBannerPositions.product_detail)
+        context['product_galleries_group'] = group_list(list(ProductGallery.objects.filter(product_id=loaded_product.id).all()), 3)
         user_ip = get_client_ip(self.request)
         user_id = None
         if self.request.user.is_authenticated:
