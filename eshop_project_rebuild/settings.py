@@ -62,6 +62,8 @@ WSGI_APPLICATION = 'eshop_project_rebuild.wsgi.application'
 
 AUTH_USER_MODEL = 'account_module.User'
 
+LOGIN_URL = '/login'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
