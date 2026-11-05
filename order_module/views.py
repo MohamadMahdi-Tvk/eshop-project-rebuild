@@ -1,25 +1,24 @@
-from django.http import HttpRequest, JsonResponse
+import time
+from django.contrib.auth.decorators import login_required
+from django.http import HttpRequest, JsonResponse, HttpResponse
+from django.shortcuts import redirect, render
 from product_module.models import Product
 from .models import Order, OrderDetail
 from django.conf import settings
 import requests
-import json
 
-# ? sandbox merchant
 if settings.SANDBOX:
     sandbox = 'sandbox'
 else:
     sandbox = 'www'
 
-ZP_API_REQUEST = f"https://{sandbox}.zarinpal.com/pg/rest/WebGate/PaymentRequest.json"
-ZP_API_VERIFY = f"https://{sandbox}.zarinpal.com/pg/rest/WebGate/PaymentVerification.json"
+ZP_API_REQUEST = f"https://{sandbox}.zarinpal.com/pg/v4/payment/request.json"
+ZP_API_VERIFY = f"https://{sandbox}.zarinpal.com/pg/v4/payment/verify.json"
 ZP_API_STARTPAY = f"https://{sandbox}.zarinpal.com/pg/StartPay/"
-
-amount = 1000  # Rial / Required
-description = "نهایی کردن کردن خرید شما از سایت ما"  # Required
-phone = ''  # Optional
-# Important: need to edit for realy server.
-CallbackURL = 'http://127.0.0.1:8080/order/verify-payment/'
+amount = 1000
+description = "نهایی کردن کردن خرید شما از سایت ما"
+phone = ''
+CallbackURL = 'http://127.0.0.1:8000/order/verify-payment/'
 
 
 def add_product_to_order(request: HttpRequest):
@@ -67,50 +66,138 @@ def add_product_to_order(request: HttpRequest):
         })
 
 
+@login_required
 def request_payment(request: HttpRequest):
+    current_order, created = Order.objects.get_or_create(
+        is_paid=False,
+        user_id=request.user.id
+    )
+
+    total_price = current_order.calculate_total_price()
+
+    if total_price <= 0:
+        return redirect('user_basket_page')
+
     data = {
-        "MerchantID": settings.MERCHANT,
-        "Amount": amount,
-        "Description": description,
-        "Phone": phone,
-        "CallbackURL": CallbackURL,
+        "merchant_id": settings.MERCHANT,
+        "amount": total_price * 10,
+        "description": description,
+        "callback_url": CallbackURL,
     }
-    data = json.dumps(data)
-    # set content length by data
-    headers = {'content-type': 'application/json', 'content-length': str(len(data))}
+
     try:
-        response = requests.post(ZP_API_REQUEST, data=data, headers=headers, timeout=10)
+        response = requests.post(
+            ZP_API_REQUEST,
+            json=data,
+            timeout=15
+        )
+
+        result = response.json()
+
+        print("Zarinpal Status:", response.status_code)
+        print("Zarinpal Response:", result)
 
         if response.status_code == 200:
-            response = response.json()
-            if response['Status'] == 100:
-                return {'status': True, 'url': ZP_API_STARTPAY + str(response['Authority']),
-                        'authority': response['Authority']}
-            else:
-                return {'status': False, 'code': str(response['Status'])}
-        return response
+
+            if result.get('data', {}).get('code') == 100:
+                authority = result['data']['authority']
+
+                return redirect(
+                    ZP_API_STARTPAY + authority
+                )
+
+            return HttpResponse(
+                f"خطای زرین‌پال: {result.get('errors')}",
+                status=502
+            )
+
+        return HttpResponse(
+            f"HTTP Error: {response.status_code} - {result}",
+            status=502
+        )
 
     except requests.exceptions.Timeout:
-        return {'status': False, 'code': 'timeout'}
+        return HttpResponse("اتمام زمان اتصال به زرین‌پال", status=504)
+
     except requests.exceptions.ConnectionError:
-        return {'status': False, 'code': 'connection error'}
+        return HttpResponse("خطا در اتصال به زرین‌پال", status=502)
+
+    except (ValueError, KeyError) as e:
+        return HttpResponse(f"خطای پردازش پاسخ: {e}", status=502)
 
 
-def verify_payment(authority):
+@login_required
+def verify_payment(request):
+    current_order, created = Order.objects.get_or_create(
+        is_paid=False,
+        user_id=request.user.id
+    )
+    total_price = current_order.calculate_total_price()
+
+    authority = request.GET.get('Authority')
+    status = request.GET.get('Status')
+
+    if status != 'OK' or not authority:
+        # return HttpResponse("پرداخت توسط کاربر لغو شد.")
+        return render(request, 'order_module/payment_result.html', {
+            'cancel': 'پرداخت توسط کاربر لغو شد'
+        })
+
+    # مبلغ باید دقیقاً همان مبلغ درخواست اولیه باشد.
+    # فعلاً این مقدار را از سفارش ذخیره‌شده دریافت کن.
+    payment_amount = total_price * 10
+
     data = {
-        "MerchantID": settings.MERCHANT,
-        "Amount": amount,
-        "Authority": authority,
+        "merchant_id": settings.MERCHANT,
+        "amount": payment_amount,
+        "authority": authority,
     }
-    data = json.dumps(data)
-    # set content length by data
-    headers = {'content-type': 'application/json', 'content-length': str(len(data))}
-    response = requests.post(ZP_API_VERIFY, data=data, headers=headers)
 
-    if response.status_code == 200:
-        response = response.json()
-        if response['Status'] == 100:
-            return {'status': True, 'RefID': response['RefID']}
-        else:
-            return {'status': False, 'code': str(response['Status'])}
-    return response
+    try:
+        response = requests.post(
+            ZP_API_VERIFY,
+            json=data,
+            timeout=15
+        )
+
+        result = response.json()
+
+        if response.status_code == 200:
+
+            if result.get('data', {}).get('code') == 100:
+                current_order.is_paid = True
+                current_order.payment_date = time.time()
+                current_order.save()
+
+                ref_id = result['data']['ref_id']
+
+                # اینجا سفارش را پرداخت‌شده کن
+                # و ref_id را در دیتابیس ذخیره کن.
+
+                # return HttpResponse(
+                #     f"پرداخت موفق بود. کد پیگیری: {ref_id}"
+                # )
+                return render(request, 'order_module/payment_result.html', {
+                    'success': f'تراکنش شما با کد پیگیری {ref_id} باموفقیت انجام شد'
+                })
+
+            # return HttpResponse(
+            #     f"پرداخت تأیید نشد: {result.get('errors')}"
+            # )
+            return render(request, 'order_module/payment_result.html', {
+                'info': 'پرداخت تایید نشد'
+            })
+
+        # return HttpResponse(
+        #     f"خطا در تأیید پرداخت: {result}",
+        #     status=502
+        # )
+        return render(request, 'order_module/payment_result.html', {
+            'error': 'خطا در تایید پرداخت'
+        })
+
+    except requests.exceptions.RequestException as e:
+        # return HttpResponse(f"خطای ارتباطی: {e}", status=502)
+        return render(request, 'order_module/payment_result.html', {
+            'connection_error': f'خطای ارتباطی: {e}'
+        })
