@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
-from django.http.response import JsonResponse
+from django.http.response import JsonResponse, Http404
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -168,4 +168,14 @@ def change_order_detail_count(request: HttpRequest):
     return JsonResponse({
         'status': 'success',
         'body': render_to_string('user_panel_module/user_basket_content.html', context)
+    })
+
+
+def my_shopping_detail(request: HttpRequest, order_id):
+    order = Order.objects.prefetch_related('orderdetail_set').filter(id=order_id, user_id=request.user.id).first()
+    if order is None:
+        raise Http404('سبد خرید مورد نظر یافت نشد')
+
+    return render(request, 'user_panel_module/user_shopping_detail.html', {
+        'order': order,
     })

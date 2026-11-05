@@ -23,7 +23,9 @@
                             <td class="text-right">{{ order.id }}</td>
                             <td class="text-right">{{ order.payment_date|date:"Y/m/d" }}</td>
                             <td class="text-right">{{ order.calculate_total_price|three_digits_currency }}</td>
-                            <td><a href="" class="btn btn-success">جزئیات</a></td>
+                            <td>
+                                <a href="{% url 'user_shopping_detail_page' order_id=order.id %}" class="btn btn-success">جزئیات</a>
+                            </td>
                         </tr>
                     {% endfor %}
                 </table>
