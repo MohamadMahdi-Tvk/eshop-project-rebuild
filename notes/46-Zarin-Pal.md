@@ -80,7 +80,6 @@ if settings.SANDBOX:
 else:
     sandbox = 'www'
 
-
 ZP_API_REQUEST = f"https://{sandbox}.zarinpal.com/pg/v4/payment/request.json"
 ZP_API_VERIFY = f"https://{sandbox}.zarinpal.com/pg/v4/payment/verify.json"
 ZP_API_STARTPAY = f"https://{sandbox}.zarinpal.com/pg/StartPay/"
@@ -91,7 +90,6 @@ CallbackURL = 'http://127.0.0.1:8000/order/verify-payment/'
 
 @login_required
 def request_payment(request: HttpRequest):
-
     current_order, created = Order.objects.get_or_create(
         is_paid=False,
         user_id=request.user.id
@@ -124,7 +122,6 @@ def request_payment(request: HttpRequest):
         if response.status_code == 200:
 
             if result.get('data', {}).get('code') == 100:
-
                 authority = result['data']['authority']
 
                 return redirect(
@@ -151,56 +148,63 @@ def request_payment(request: HttpRequest):
         return HttpResponse(f"خطای پردازش پاسخ: {e}", status=502)
 
 
+@login_required
 def verify_payment(request):
+    current_order, created = Order.objects.get_or_create(
+        is_paid=False,
+        user_id=request.user.id
+    )
+    total_price = current_order.calculate_total_price()
 
     authority = request.GET.get('Authority')
     status = request.GET.get('Status')
 
     if status != 'OK' or not authority:
-        return HttpResponse("پرداخت توسط کاربر لغو شد.")
+        # return HttpResponse("پرداخت توسط کاربر لغو شد.")
+        return render(request, 'order_module/payment_result.html', {
+            'cancel': 'پرداخت توسط کاربر لغو شد'
+        })
 
-    # مبلغ باید دقیقاً همان مبلغ درخواست اولیه باشد.
-    # فعلاً این مقدار را از سفارش ذخیره‌شده دریافت کن.
-    payment_amount = ...
+    payment_amount = total_price * 10
 
     data = {
         "merchant_id": settings.MERCHANT,
         "amount": payment_amount,
         "authority": authority,
     }
-
     try:
         response = requests.post(
             ZP_API_VERIFY,
             json=data,
             timeout=15
         )
-
         result = response.json()
 
         if response.status_code == 200:
 
             if result.get('data', {}).get('code') == 100:
+                current_order.is_paid = True
+                current_order.payment_date = time.time()
+                current_order.save()
+
                 ref_id = result['data']['ref_id']
 
-                # اینجا سفارش را پرداخت‌شده کن
-                # و ref_id را در دیتابیس ذخیره کن.
+                return render(request, 'order_module/payment_result.html', {
+                    'success': f'تراکنش شما با کد پیگیری {ref_id} باموفقیت انجام شد'
+                })
 
-                return HttpResponse(
-                    f"پرداخت موفق بود. کد پیگیری: {ref_id}"
-                )
+            return render(request, 'order_module/payment_result.html', {
+                'info': 'پرداخت تایید نشد'
+            })
 
-            return HttpResponse(
-                f"پرداخت تأیید نشد: {result.get('errors')}"
-            )
-
-        return HttpResponse(
-            f"خطا در تأیید پرداخت: {result}",
-            status=502
-        )
+        return render(request, 'order_module/payment_result.html', {
+            'error': 'خطا در تایید پرداخت'
+        })
 
     except requests.exceptions.RequestException as e:
-        return HttpResponse(f"خطای ارتباطی: {e}", status=502)
+        return render(request, 'order_module/payment_result.html', {
+            'connection_error': f'خطای ارتباطی: {e}'
+        })
 ```
 
 ## Project Packages:

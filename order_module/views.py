@@ -1,4 +1,4 @@
-import time
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
@@ -143,8 +143,6 @@ def verify_payment(request):
             'cancel': 'پرداخت توسط کاربر لغو شد'
         })
 
-    # مبلغ باید دقیقاً همان مبلغ درخواست اولیه باشد.
-    # فعلاً این مقدار را از سفارش ذخیره‌شده دریافت کن.
     payment_amount = total_price * 10
 
     data = {
@@ -152,52 +150,36 @@ def verify_payment(request):
         "amount": payment_amount,
         "authority": authority,
     }
-
     try:
         response = requests.post(
             ZP_API_VERIFY,
             json=data,
             timeout=15
         )
-
         result = response.json()
 
         if response.status_code == 200:
 
             if result.get('data', {}).get('code') == 100:
                 current_order.is_paid = True
-                current_order.payment_date = time.time()
+                current_order.payment_date = timezone.now().date()
                 current_order.save()
 
                 ref_id = result['data']['ref_id']
 
-                # اینجا سفارش را پرداخت‌شده کن
-                # و ref_id را در دیتابیس ذخیره کن.
-
-                # return HttpResponse(
-                #     f"پرداخت موفق بود. کد پیگیری: {ref_id}"
-                # )
                 return render(request, 'order_module/payment_result.html', {
                     'success': f'تراکنش شما با کد پیگیری {ref_id} باموفقیت انجام شد'
                 })
 
-            # return HttpResponse(
-            #     f"پرداخت تأیید نشد: {result.get('errors')}"
-            # )
             return render(request, 'order_module/payment_result.html', {
                 'info': 'پرداخت تایید نشد'
             })
 
-        # return HttpResponse(
-        #     f"خطا در تأیید پرداخت: {result}",
-        #     status=502
-        # )
         return render(request, 'order_module/payment_result.html', {
             'error': 'خطا در تایید پرداخت'
         })
 
     except requests.exceptions.RequestException as e:
-        # return HttpResponse(f"خطای ارتباطی: {e}", status=502)
         return render(request, 'order_module/payment_result.html', {
             'connection_error': f'خطای ارتباطی: {e}'
         })

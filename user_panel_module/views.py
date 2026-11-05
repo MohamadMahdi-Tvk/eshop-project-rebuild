@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.views import View
+from django.views.generic.list import ListView
 
 from order_module.models import Order, OrderDetail
 from .forms import EditProfileModelForm, ChangePasswordForm
@@ -66,6 +67,18 @@ class ChangePasswordPage(View):
             'form': form,
         }
         return render(request, 'user_panel_module/change_password_page.html', context)
+
+
+@method_decorator(login_required, name='dispatch')
+class MyShopping(ListView):
+    model = Order
+    template_name = 'user_panel_module/user_shopping.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        request: HttpRequest = self.request
+        queryset = queryset.filter(user_id=request.user.id, is_paid=True)
+        return queryset
 
 
 @login_required
