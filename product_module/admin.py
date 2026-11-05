@@ -16,9 +16,9 @@ admin.site.register(models.ProductVisit)
 admin.site.register(models.ProductGallery)
 
 # ----------------------------------------------------------------------------------------------------
-# username & password (admin):
+# username & password (admin_panel):
 
-# username: admin
+# username: admin_panel
 # password: 1234
 
 # username & password (other user):
