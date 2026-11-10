@@ -1,4 +1,26 @@
 from django.contrib import admin
 from . import models
+from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
 
-admin.site.register(models.User)
+
+@admin.register(models.User)
+class CustomUserAdmin(UserAdmin):
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        (_("Personal info"), {"fields": ("first_name", "last_name", "email")}),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                ),
+            },
+        ),
+        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+        (_("Custom Information"), {"fields": ("avatar", "email_active_code", "about_user", "address")}),
+    )
