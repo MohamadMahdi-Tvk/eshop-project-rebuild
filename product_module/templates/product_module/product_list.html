@@ -1,5 +1,5 @@
 {% extends 'shared/_layout.html' %}
-{% load render_partial %}
+{% load render_partial thumbnail product_tags %}
 
 {% block title %}لیست محصولات{% endblock %}
 
@@ -46,8 +46,10 @@
 
                 <div class="col-sm-3">
                     <div class="left-sidebar">
-                        {% render_partial 'product_module.views.product_categories_component' %}
-                        {% render_partial 'product_module.views.product_brands_component' %}
+                        {% comment %}{% render_partial 'product_module.views.product_categories_component' %}{% endcomment %}
+                        {% comment %}{% render_partial 'product_module.views.product_brands_component' %}{% endcomment %}
+                        {% product_categories_inclusion %}
+                        {% product_brands_inclusion %}
 
                         <div class="price-range">
                             <h2>فیلتـر قیمـت</h2>
