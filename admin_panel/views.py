@@ -37,4 +37,4 @@ class ArticleEditView(PermissionRequiredMixin, UpdateView):
     success_url = reverse_lazy('admin_articles')
     permission_required = ['article_module.change_article']
     raise_exception = True
-    permission_denied_message = 'شما دسترسی به این صفحه ندارد!'
+    permission_denied_message = 'شما دسترسی به این صفحه ندارید!'

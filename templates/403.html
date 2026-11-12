@@ -1,0 +1,15 @@
+{% extends 'shared/_layout.html' %}
+
+{% block title %}
+    عدم دسترسی
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="col-lg-12">
+            <h1>عدم دسترسی</h1>
+            <p>{{ exception }}</p>
+            <p>{{ data }}</p>
+        </div>
+    </div>
+{% endblock %}

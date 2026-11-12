@@ -17,3 +17,12 @@ urlpatterns = [
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+def handle_permission_denied(request, exception, *args, **kwargs):
+    from django.shortcuts import render
+
+    return render(request, '403.html', {"exception": exception, "data": "This is data"})
+
+
+handler403 = handle_permission_denied
