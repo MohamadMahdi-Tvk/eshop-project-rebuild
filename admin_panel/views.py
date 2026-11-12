@@ -1,22 +1,22 @@
 from django.http import HttpRequest
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
 from django.views.generic import ListView, UpdateView
 from article_module.models import Article
-from utils.my_decorators import permission_checker_decorator_factory
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
-@permission_checker_decorator_factory({'permission_name': 'admin_index'})
+@permission_required('site_module.view_adminpanel', raise_exception=True)
 def index(request: HttpRequest):
     return render(request, 'admin_panel/home/index.html')
 
 
-@method_decorator(permission_checker_decorator_factory({'permission_name': 'article_list'}), name='dispatch')
-class ArticlesListView(ListView):
+class ArticlesListView(PermissionRequiredMixin, ListView):
     model = Article
     paginate_by = 12
     template_name = 'admin_panel/articles/articles_list.html'
+    permission_required = ['article_module.view_article']
 
     def get_context_data(self, *args, **kwargs):
         context = super(ArticlesListView, self).get_context_data(*args, **kwargs)
@@ -30,9 +30,11 @@ class ArticlesListView(ListView):
         return query
 
 
-@method_decorator(permission_checker_decorator_factory(), name='dispatch')
-class ArticleEditView(UpdateView):
+class ArticleEditView(PermissionRequiredMixin, UpdateView):
     model = Article
     template_name = 'admin_panel/articles/edit_article.html'
     fields = '__all__'
     success_url = reverse_lazy('admin_articles')
+    permission_required = ['article_module.change_article']
+    raise_exception = True
+    permission_denied_message = 'شما دسترسی به این صفحه ندارد!'

@@ -16,6 +16,12 @@ class SiteSetting(models.Model):
     class Meta:
         verbose_name = 'تنظیمات سایت'
         verbose_name_plural = 'تنظیمات'
+        permissions = [
+            (
+                "view_adminpanel",
+                "دیدن ادمین سایت"
+            ),
+        ]
 
     def __str__(self):
         return self.site_name
