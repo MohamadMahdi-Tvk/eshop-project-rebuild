@@ -29,7 +29,8 @@ INSTALLED_APPS = [
     # external apps
     'django_render_partial',
     'sorl.thumbnail',
-    'widget_tweaks'
+    'widget_tweaks',
+    'guardian'
 ]
 
 MIDDLEWARE = [
@@ -113,10 +114,17 @@ MAILERS = {
     },
 }
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)
+
+GUARDIAN_MONKEY_PATCH_GROUP = True
+GUARDIAN_MONKEY_PATCH_USER = True
+
 # SANDBOX MODE
 MERCHANT = "00000000-0000-0000-0000-000000000000"
 SANDBOX = True
-
 
 # SESSION_COOKIE_AGE = 120
 
