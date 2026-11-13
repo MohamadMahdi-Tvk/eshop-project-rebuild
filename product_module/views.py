@@ -7,6 +7,8 @@ from site_module.models import SiteBanner
 from utils.http_service import get_client_ip
 from utils.converters import group_list
 from .models import Product, ProductCategory, ProductBrand, ProductVisit, ProductGallery
+from guardian.utils import get_anonymous_user
+from guardian.shortcuts import get_objects_for_user
 
 
 class ProductListView(ListView):
@@ -30,7 +32,16 @@ class ProductListView(ListView):
         return context
 
     def get_queryset(self):
-        print('queryset')
+        # print('queryset')
+        # print(f'user is authenticated: {self.request.user.is_authenticated}')
+        # print(f'user is anonymous: {self.request.user.is_anonymous}')
+
+        if self.request.user.is_anonymous:
+            user = get_anonymous_user()
+        else:
+            user = self.request.user
+        print(f'current user name is: {user.username}')
+
         query = super(ProductListView, self).get_queryset()
         category_name = self.kwargs.get('cat')
         brand_name = self.kwargs.get('brand')
@@ -47,6 +58,13 @@ class ProductListView(ListView):
 
         if category_name is not None:
             query = query.filter(category__url_title__iexact=category_name)
+
+        # query = get_objects_for_user(
+        #     user=user,
+        #     klass=query,
+        #     perms=["view_product"],
+        #     accept_global_perms=False
+        # )
         return query
 
 

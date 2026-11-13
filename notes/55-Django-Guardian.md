@@ -181,3 +181,32 @@ class ArticleGroupObjectPermission(GroupObjectPermissionBase):
 7. `assign_perm("view_article", user, article)`
 8. `assign_perm("change_article", user, article)`
 9. `remove_perm("change_article", user, article)`
+
+## Fix Login
+
+چون ما مورد زیر را برای احراز هویت پکیج گاردین اضافه کردیم:
+
+```
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)
+```
+
+در لاگین کردن یوزر به مشکل میخوریم، چون ما یک بک اند جدید اضافه کرده ایم؛ و مدل بک اند ما بصورت پیش فرض روی مدل بک اند
+خود جنگو تنظیم شده بود، و ما اومدیم یک بک اند جدید اضافه کرده ایم؛ ما در فانکشن لاگینی که پیاده سازی کرده ایم، میتوانیم
+بک اند را تنظیم کنیم تا دیگر ارور ندهد:
+
+```
+if is_password_correct:
+    user.backend = "django.contrib.auth.backends.ModelBackend"
+    login(request, user)
+    return redirect(reverse('user_panel_dashboard'))
+```
+
+## Guardian Document
+
+پیشنهاد میشود برای یادگیری بیشتر این پکیج، داکیومنت رسمی آن مطالعه شود:
+
+`https://django-guardian.readthedocs.io/en/stable/`
+

@@ -87,6 +87,7 @@ class LoginView(View):
                 else:
                     is_password_correct = user.check_password(user_pass)
                     if is_password_correct:
+                        user.backend = "django.contrib.auth.backends.ModelBackend"
                         login(request, user)
                         return redirect(reverse('user_panel_dashboard'))
                     else:
