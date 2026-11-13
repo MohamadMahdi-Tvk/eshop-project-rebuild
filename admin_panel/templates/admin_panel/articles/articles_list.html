@@ -1,5 +1,7 @@
 {% extends 'admin_panel/shared/_admin_layout.html' %}
 
+{% load guardian_tags %}
+
 {% block title %}
     صفحه اصلی ادمین
 {% endblock %}
@@ -15,6 +17,7 @@
                         <th>دستورات</th>
                     </tr>
                     {% for article in object_list %}
+                        {% get_obj_perms user for article as 'article_perms' %}
                         <tr>
                             <td>{{ article.title }}</td>
                             <td>
@@ -25,7 +28,10 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="{% url 'admin_edit_article' pk=article.id %}" class="btn btn-warning">ویرایش محصول</a>
+                                {% if "change_article" in article_perms %}
+                                    <a href="{% url 'admin_edit_article' pk=article.id %}" class="btn btn-warning">ویرایش
+                                        محصول</a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

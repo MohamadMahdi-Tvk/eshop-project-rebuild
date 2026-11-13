@@ -4,7 +4,8 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, UpdateView
 from article_module.models import Article
 from django.contrib.auth.decorators import permission_required
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from guardian.mixins import PermissionRequiredMixin
+from guardian.shortcuts import get_objects_for_user
 
 
 @permission_required('site_module.view_adminpanel', raise_exception=True)
@@ -27,6 +28,17 @@ class ArticlesListView(PermissionRequiredMixin, ListView):
         category_name = self.kwargs.get('category')
         if category_name is not None:
             query = query.filter(selected_categories__url_title__iexact=category_name)
+
+        query = get_objects_for_user(
+            user=self.request.user,
+            perms=self.permission_required,
+            klass=query,
+            accept_global_perms=False,
+        )
+
+        for article in query:
+            print(f'User has access to change {article.title}: {self.request.user.has_perm("change_article", article)}')
+
         return query
 
 
@@ -36,5 +48,6 @@ class ArticleEditView(PermissionRequiredMixin, UpdateView):
     fields = '__all__'
     success_url = reverse_lazy('admin_articles')
     permission_required = ['article_module.change_article']
-    raise_exception = True
+    raise_exception = False
+    return_404 = True
     permission_denied_message = 'شما دسترسی به این صفحه ندارید!'

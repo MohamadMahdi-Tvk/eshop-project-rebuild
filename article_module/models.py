@@ -1,4 +1,6 @@
 from django.db import models
+from guardian.models import UserObjectPermissionBase, GroupObjectPermissionBase
+
 from account_module.models import User
 
 
@@ -49,3 +51,25 @@ class ArticleComment(models.Model):
     class Meta:
         verbose_name = 'نظر مقاله'
         verbose_name_plural = 'نظرات مقاله'
+
+
+class ArticleUserObjectPermission(UserObjectPermissionBase):
+    content_object = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name="article_user_object_permission",
+    )
+
+    class Meta(UserObjectPermissionBase.Meta):
+        db_table = 'article_user_object_permission'
+
+
+class ArticleGroupObjectPermission(GroupObjectPermissionBase):
+    content_object = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name="article_group_object_permissions",
+    )
+
+    class Meta(GroupObjectPermissionBase.Meta):
+        db_table = 'article_group_object_permissions'
